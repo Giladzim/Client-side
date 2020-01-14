@@ -1,0 +1,148 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title></title>
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <script src="../Scripts/pokemon.js"></script>
+    <script src="../Scripts/ajaxCalls.js"></script>
+
+
+    <script>
+
+        $(document).ready(function () {
+            attack = 0;
+            power = 0;
+            $(document).on("click", ".pokImg", function () {
+                AddPok(this.id);
+            });
+            $("#loadBtn").click(insertPokemons);
+            $("#readBtn").click(readFromDB);
+        });
+
+        function insertPokemons() {
+            pokArr = [];
+            for (var i = 0; i < pokemons.length; i++) {
+                num = i + 1;
+                pok = {
+                    Name: pokemons[i].name.english,
+                    Image: "https://raw.githubusercontent.com/fanzeyi/pokemon.json/master/images/00" + num + ".png",
+                    Hp: pokemons[i].base.HP,
+                    Attack: pokemons[i].base.Attack,
+                }
+                pokArr.push(pok);
+            }
+
+            ajaxCall("POST", "../api/pokemon", JSON.stringify(pokArr), success, error);
+        }
+
+        function success(data) {
+            console.log(data);
+        }
+
+        function error(err) {
+            alert("error");
+        }
+
+        function readFromDB() {
+            // get the pokemons from the database
+            // in the success callback function, use renderPokemons(Arr) to רender the page
+             ajaxCall("GET", "../api/pokemon", "", renderPokemons, renderPokemonsError);
+
+        }
+
+        function AddPok(id) {
+            ids = "#" + id;
+            $(ids).parent().css("background-color", "brown");
+            // in case you added the second pokemon - fight
+            // after the fight update the hp of the attacked
+            // pokemon in the database
+            if (power == 0) {
+                power = pokesArr[id].Attack;
+            }
+            attack += 1;
+            if (attack == 2) {
+                console.log(id);
+                newHp = 0;
+                if (pokesArr[id].Hp - power > 0) {
+                    newHp = pokesArr[id].Hp - power
+                }
+                tempPoke = {
+                    "id": +id + 1,
+                    "hp": newHp
+                };
+                 ajaxCall("PUT", "../api/pokemon", JSON.stringify(tempPoke), updatePokemonSuccessCB, updatePokemonErrorCB);
+                pokesArr[id].Hp = newHp;
+                document.getElementById("ph").innerHTML = "";
+                renderPokemons(pokesArr)
+                attack = 0;
+                power = 0;
+            }
+        }
+
+        function updatePokemonSuccessCB() {
+            console.log("success update");
+        }
+
+        function updatePokemonErrorCB(err) {
+            console.log(err);
+        }
+
+        function renderPokemons(pArr) {
+            pokesArr = pArr;
+            str = "";
+            for (var i = 0; i < pArr.length; i++) {
+                str += "<div class='pokDiv'>";
+                str += "<img class='pokImg' id = '" + i + "' src='" + pArr[i].Image + "'/>";
+                str += "<p>hp: <span>" + pArr[i].Hp + "</span></p>";
+                str += "<p>attack:  <span>" + pArr[i].Attack + "</span></p>"
+                str += "</div>";
+            }
+            document.getElementById("ph").innerHTML = str;
+        }
+
+        function renderPokemonsError(err) {
+            console.log(err);
+        }
+
+
+
+    </script>
+
+    <style type="text/css">
+
+        .pokDiv {
+            width: 10%;
+            float: left;
+            border: 2px solid black;
+            text-align: center
+        }
+
+            .pokDiv img {
+                width: 100%;
+            }
+
+        button {
+            margin-right: 100px;
+        }
+
+        #ph {
+            margin-top: 50px;
+        }
+    </style>
+
+</head>
+<body>
+    <div id="container">
+        <div>
+            <button id="loadBtn">Load from JS and insert to the DB</button>
+            <button id="readBtn">Read from the DB</button>
+        </div>
+        <div id="ph"></div>
+
+    </div>
+
+
+
+</body>
+</html>
