@@ -1,0 +1,4 @@
+ <connectionStrings>
+    <add name= "airportDBConnectionString" connectionString="Data Source=Media.ruppin.ac.il;
+      Initial Catalog=igroup17_test1; User ID=igroup17; Password=igroup17_01603" />
+  </connectionStrings>
