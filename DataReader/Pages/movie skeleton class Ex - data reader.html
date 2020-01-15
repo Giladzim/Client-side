@@ -1,0 +1,114 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Bootstrap Example</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+    <script src="../Scripts/ajaxCalls.js"></script>
+    <style type="text/css">
+
+        #readMovies {
+            background-color:yellow
+        }
+
+    </style>
+
+    <script>
+
+        $(document).ready(function () {
+            $("#pForm").submit(f1);
+            $("#readForm").submit(f2);
+        });
+
+        function AddMovie() {
+            Movie = { // Note that the name of the fields must be identical to the names of the properties of the object in the server
+                Name: $("#Name").val(),
+                Actor: $("#Actor").val()
+            };
+            ajaxCall("POST", "../api/movies", JSON.stringify(Movie), success, error);
+
+        }
+
+        function success(data) {
+            swal("Added Successfuly!", "Messi is still number 1", "success");
+        }
+
+        function error(err) {
+            alert("error");
+        }
+
+        function f1() {
+            AddMovie();
+            return false; // the return false will prevent the form from being submitted
+            // hence the page will not reload
+        }
+
+        function f2() {
+            readMovies();
+            return false;
+        }
+
+        function readMovies() {
+            var actor = $("#getactor").val();
+            var url = "../api/movies?actor=" + actor;
+            //var url = "../api/cars";
+            ajaxCall("GET", url, "", getSuccessBCB, getErrorCB);
+        }
+
+        function getSuccessBCB(data) {
+            console.log(data);
+        }
+
+        function getErrorCB(err) {
+            console.log(err);
+        }
+
+    </script>
+
+</head>
+<body>
+
+
+
+
+    <div class="container">
+        <form id="pForm">
+            <h2>New Movie</h2>
+            <div class="form-group">
+                <label for="Name">Name</label>
+                <input type="text" class="form-control" id="Name" placeholder="Enter the movie name" required>
+            </div>
+            <div class="form-group">
+                <label for="Actor">Actor</label>
+                <input type="text" class="form-control" id="Actor" placeholder="Enter the Actor name" required>
+            </div>
+
+            <!--<button class="btn btn-default" id="add">Add</button>-->
+            <input type="submit" value="Submit BTN" />
+        </form>
+        <div id="readMovies">
+
+            <form id="readForm">
+                <h2>Read Movies</h2>
+                <div class="form-group">
+                    <label for="getactor">actor name</label>
+                    <input type="text" class="form-control" id="getactor" placeholder="Enter the actor name" required>
+                </div>
+                <input type="submit" value="Get Movies" />
+            </form>
+
+            <div id="ph">
+
+            </div>
+        </div>
+    </div>
+
+
+
+
+</body>
+</html>

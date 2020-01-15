@@ -1,0 +1,138 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Bootstrap Example</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+    <script src="../Scripts/ajaxCalls.js"></script>
+
+    <style type="text/css">
+
+        #readCars {
+            background-color:yellow
+        }
+
+    </style>
+
+    <script>
+
+        $(document).ready(function () {
+            $("#pForm").submit(f1);
+            $("#readForm").submit(f2);
+            
+        });
+
+        function AddCar() {
+            Car = { // Note that the name of the fields must be identical to the names of the properties of the object in the server
+                Model: $("#model").val(),
+                Manufacturer: $("#manufacturer").val(),
+                Price: parseFloat($("#price").val()),
+                Year: parseInt($("#year").val())
+            };
+            ajaxCall("POST", "../api/cars", JSON.stringify(Car), success, error);
+
+        }
+
+        function success(data) {
+            swal("Added Successfuly!", "Messi is number 1", "success");
+        }
+
+        function error(err) {
+            alert("error");
+        }
+
+        function f1() {
+            AddCar();
+            return false; // the return false will prevent the form from being submitted
+            // hence the page will not reload
+        }
+
+        function f2() {
+            readCars();
+            return false;
+        }
+
+        function readCars() {
+            var year = $("#getyear").val();
+            var url = "../api/cars?year=" + year;
+            //var url = "../api/cars";
+            ajaxCall("GET", url, "", getSuccessBCB, getErrorCB);
+        }
+
+        function getSuccessBCB(data) {
+            console.log(data);
+            str = "";
+            for (var i = 0; i < data.length; i++) {
+                car = data[i];
+                str += "<p>" + car.Manufacturer + "," + car.Model + "," + car.Year + "," + car.Price + "</p>";
+            }
+            $("#ph").html(str);
+        }
+
+        function getErrorCB(err) {
+            alert("error");
+        }
+
+
+    </script>
+
+</head>
+<body>
+
+
+
+
+    <div class="container">
+        <form id="pForm">
+            <h2>Cars Store Inventory</h2>
+            <div class="form-group">
+                <label for="model">Model</label>
+                <input type="text" class="form-control" id="model" placeholder="Enter the model name" required>
+            </div>
+            <div class="form-group">
+                <label for="manufacturer">Manufacturer</label>
+                <input type="text" class="form-control" id="manufacturer" placeholder="Enter the manufacturer name" required>
+            </div>
+            <div class="form-group">
+                <label for="price">Price</label>
+                <input type="number" class="form-control" id="price" placeholder="Enter the price" required>
+            </div>
+            <div class="form-group">
+                <label for="year">Year</label>
+                <select id="year" required>
+                    <option value="">Choose Year</option>
+                    <option value="2019">2019</option>
+                    <option value="2018">2018</option>
+                    <option value="2017">2017</option>
+                    <option value="2016">2016</option>
+                </select>
+            </div>
+            <!--<button class="btn btn-default" id="add">Add</button>-->
+            <input type="submit" value="Insert Car" />
+        </form>
+
+        <div id="readCars">
+
+            <form id="readForm">
+                <h2>Read Car Inventory</h2>
+                <div class="form-group">
+                    <label for="getyear">Year</label>
+                    <input type="text" class="form-control" id="getyear" placeholder="Enter the year you want to get" required>
+                </div>
+                <input type="submit" value="Get Cars" />
+            </form>
+
+            <div id="ph">
+
+            </div>
+        </div>
+
+    </div>
+
+
+</body>
+</html>
