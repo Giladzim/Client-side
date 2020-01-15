@@ -1,0 +1,226 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+
+    <title>Phone Book App</title>
+
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="../scripts/ajaxCalls.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/responsive/2.2.3/js/dataTables.responsive.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="//cdn.datatables.net/1.10.20/css/jquery.dataTables.min.css" />
+
+    <style type="text/css">
+        td {
+            width: 200px;
+        }
+
+        img {
+            height: 150px;
+        }
+        .selected{
+            background-color:green;
+        }
+    </style>
+</head>
+
+<body>
+
+<img src="images/pizza.png" />
+
+    <form id="productForm" onsubmit="return false">
+    <div>
+    
+        <h2>Best Pizza in the Universe</h2>
+
+        <table>
+            <tr>
+                <td>Type</td>
+                <td>
+                    <select required id="type">
+                        <option value="">select the type of pizza</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td>name</td>
+                <td>
+                    <input required type="text" id="nameTB" />
+                </td>
+            </tr>
+
+            <tr>
+                <td>Phone Number</td>
+                <td>
+                    <input required pattern="[1-9]{10}" title="10 numbers" type="text" id="numberTB" />
+                </td>
+            </tr>
+
+            <tr>
+                <td>Address</td>
+                <td>
+                    <input required type="text" id="addressTB" />
+                </td>
+            </tr>
+
+            <tr>
+                <td>Self Pickup</td>
+                <td>
+                    <input type="checkbox" id="spCB" />
+                </td>
+            </tr>
+
+
+            <tr>
+                <td>
+                   <input type="submit" value="Add"/>
+                </td>
+            </tr>
+        </table>
+
+
+    </div>
+
+    <div id="show">
+
+        <h2>Orders</h2>
+
+        <table id="orderTable">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>Id</th>
+                    <th>Name</th>
+                    <th>Address</th>
+                    <th>Phone Number</th>
+                    <th>PickUp</th>
+                    <th>Pizza id</th>
+                </tr>
+            </thead>
+        </table>
+        
+    </div>
+
+        
+</form>
+
+    <script>
+        $(document).ready(() => {
+            ajaxCall("GET", "../api/pizza", "", successPizza, error)
+            ajaxCall("GET", "../api/Order", "", getOrderSuccess, error)
+
+        })
+
+
+        function successPizza(data) {
+            console.log(data)
+            pizzaType = data;
+            str = "";
+            for (var i = 0; i < pizzaType.length; i++) {
+                str += "<option value=" + pizzaType[i].Id + ">" + pizzaType[i].Name+"</option>"
+            }
+            $("#type").html(str)
+        }
+        function error(err) {
+            console.log(err);
+        }
+
+        $("#productForm").submit(() => {
+            type = $("select").val()
+            name = $("#nameTB").val()
+            number = $("#numberTB").val()
+            address = $("#addressTB").val();
+            selfpu = $("#spCB").prop("checked")
+            // alert(selfpu)
+            alert(address)
+            order = {
+                "Name": name,
+                "Address": address,
+                "PhoneNumber": number,
+                "PizzaId": type,
+                "SelfPickup":selfpu,
+            }
+            console.log(order);
+            ajaxCall("POST", "../api/order", JSON.stringify(order),successPostOrder, error)
+            $("input").val("");
+
+
+        })
+        function getOrderSuccess(data) {
+            console.log(data);
+            myOrder = data;
+            try {
+                tbl = $("#orderTable").DataTable({
+                    data: myOrder,
+                    pageLength: 10,
+                    columns: [
+                        {
+                            render: function (data, type, row, meta) {
+
+
+
+                                return "";
+                            }
+                        },
+                        { data: "Id" },
+                        { data: "Name" },
+                        { data: "Address" },
+                        { data: "Phonenumber" },
+                        {
+                            render: function (data, type, row, meta) {
+                                
+                                if (row.SelfPickup == false) {
+                                    
+                                    return "<input class='getColor' type=checkbox disabled checked></input>";
+                                }
+                                else return "<input disabled type=checkbox></input>";
+
+                            }    
+                            },
+                        { data: "PizzaId" },
+
+
+
+					],
+					createdRow: function (row, data, dataIndex) {
+						if (data.SelfPickup==false) {
+							$(row).addClass('selected');
+						}
+					}
+							
+                });
+
+            }
+            catch (err) {
+                alert(err);
+            }
+
+
+            
+        }
+       
+       
+        function successPostOrder(data) {
+            console.log(data);//return array of orders after post
+            alert("good post")
+            tbl.clear();
+            redrawTable(tbl, data);
+        }
+        function redrawTable(tbl, data) {
+            
+            console.log(data);
+            tbl.clear();
+            for (var i = 0; i < data.length; i++) {
+
+                tbl.row.add(data[i]);
+               
+            }
+            tbl.draw();
+        }
+    </script>
+</body>
+</html>
+
